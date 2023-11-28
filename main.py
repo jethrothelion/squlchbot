@@ -1,4 +1,5 @@
 import datetime
+from datetime import datetime
 import discord
 import random
 from discord.ext import tasks, commands
@@ -12,8 +13,6 @@ import socket
 import youtube_dl
 CHANNEL_ID=834800817042096131
 
-
-
 intents = discord.Intents().all()
 
 bot = discord.ext.commands.Bot(command_prefix = "!", intents=intents)
@@ -25,7 +24,8 @@ async def handle_client(client_socket):
         await loop.sock_sendall(client_socket, message.encode())
     global client
     client = client_socket
-    print(time)
+
+    print(datetime.now())
     password = "172362"
 
     # Send a prompt for password
@@ -47,9 +47,35 @@ async def handle_client(client_socket):
 
 
             recieved = data.decode()
-            channel = CHANNEL_ID
-            channel = bot.get_channel(1146187982701875291)
-            await channel.send(recieved)
+            channelpart = recieved.split(" ")
+            msgcontent = channelpart.pop(0)
+
+
+            if channelpart.__contains__("shit"):
+                channel = bot.get_channel(837553172217593906)
+                await channel.send()
+                return
+            if channelpart.__contains__("shop"):
+                channel = bot.get_channel(1174870748142256188)
+                await channel.send(recieved)
+                return
+            if channelpart.__contains__("plan"):
+                channel = bot.get_channel(1174871457701056593)
+                await channel.send(recieved)
+                return
+            if channelpart.__contains__("resume"):
+                channel = bot.get_channel(1176520850678226964)
+                await channel.send(msgcontent)
+                return
+            if channelpart.__contains__("mom"):
+                channel = bot.get_channel(1105226246633304235)
+                await channel.send(recieved)
+                return
+            else:
+                channel = bot.get_channel(837553172217593906)
+                await channel.send(recieved)
+
+
     else:
         await send_message("gett outta here")
 
@@ -74,9 +100,10 @@ async def start_server():
         asyncio.create_task(handle_client(client_socket))
 
 async def sendMessage(client, message):
-    if message.__contains__("luna taking blinker"):
+    if message.__contains__(bot.user):
         x = 10
     else:
+
         await loop.sock_sendall(client, message.encode())
 
 @bot.event
@@ -88,38 +115,38 @@ async def on_ready():
 
 
 #weawther a nd ti mwer systems
-@aiocron.crontab("30 6 * * *")
+@aiocron.crontab("20 9 * * *")
 async def WeatherTime():
-    present = datetime.datetime.now()
-    future = datetime.datetime(2023, 6, 17, 15, 0, 0)
+
+    present = datetime.now()
+    future = datetime(2023, 6, 17, 15, 0, 0)
     difference = future - present
     summer = str(difference)
     global totalsummer
     totalsummer = summer[:7]
 
-    present2 = datetime.datetime.now()
-    future2 = datetime.datetime(2024, 7, 9, 15, 0, 0)
+    present2 = datetime.now()
+    future2 = datetime(2024, 7, 9, 15, 0, 0)
     difference2 = future2 - present2
     cbray = str(difference2)
     global Cbray
     Cbray = cbray[:7]
 
-    present4 = datetime.datetime.now()
-    future4 = datetime.datetime(2024, 6, 29, 15, 0, 0)
+    present4 = datetime.now()
+    future4 = datetime(2024, 6, 29, 15, 0, 0)
     difference4 = future4 - present4
     gbray = str(difference4)
     global Gbray
     Gbray = gbray[:7]
 
-    present3 = datetime.datetime.now()
-    future3 = datetime.datetime(2024, 6, 17, 15, 0, 0)
+    present3 = datetime.now()
+    future3 = datetime(2024, 6, 17, 15, 0, 0)
     difference3 = future3 - present3
     rbray = str(difference3)
     global Rbray
     Rbray = rbray[:7]
 
     currentDayIndex = 12
-    updateOccurred = False
 
     URL = "https://forecast.weather.gov/MapClick.php?CityName=Hatboro&state=PA&site=PHI&lat=40.1775&lon=-75.1048#.YnVdK07MK1s"
     page = requests.get(URL)
@@ -155,6 +182,7 @@ async def WeatherTime():
     extra = "thiswork"
     channel = bot.get_channel(1146187982701875291)
     await channel.send(fullthing)
+
 
 
 
@@ -232,9 +260,17 @@ async def on_message(message, user: discord.Member = None):
         await message.add_reaction(med)
 
 
-    if username != "luna taking blinker":
+    if username != bot.user.name:
+
+        if username.__contains__("lunyx"):
+            await message.channel.send(f"das fagot ass bitch")
+            return
+        if user_message.__contains__("stop"):
+            await message.channel.send("no cunt dick dancer bitch")
+            return
+
         if user_message.lower() == "hello":
-            await message.channel.send(f"hello: {username}")
+            await message.channel.send(f"hello {username}")
             return
         if user_message.lower() == "bye":
             await message.channel.send("goodbye")
@@ -248,16 +284,13 @@ async def on_message(message, user: discord.Member = None):
         if user_message.__contains__("fog"):
             await message.channel.send(f"desharen")
             return
-        if username.__contains__("ben"):
-            await message.channel.send("you sure?")
-            return
         channelstr = str(channel)
         if channelstr.__contains__("Direct Message"):
             await message.channel.send("skibidie toiliet centeral")
             return
-
-
-
+        if user_message.__contains__(f"help"):
+            await message.channel.send("skiltles -")
+            return
 
 
 
