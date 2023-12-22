@@ -11,22 +11,30 @@ from bs4 import BeautifulSoup
 import asyncio
 import socket
 import youtube_dl
+import UIonwakeup
+from ip2geotools.databases.noncommercial import DbIpCity
 CHANNEL_ID=834800817042096131
 
 intents = discord.Intents().all()
 
 bot = discord.ext.commands.Bot(command_prefix = "!", intents=intents)
+async def temp():
+    channel = bot.get_channel(1186067959479812126)
+    await channel.send("detected")
+
 
 #socket connection
 async def handle_client(client_socket):
 
     async def send_message(message):
         await loop.sock_sendall(client_socket, message.encode())
+
+
     global client
     client = client_socket
 
     print(datetime.now())
-    password = "172362"
+    password = "skibiditoilet433"
 
     # Send a prompt for password
     await send_message("Enter password: ")
@@ -48,36 +56,33 @@ async def handle_client(client_socket):
 
             recieved = data.decode()
             channelpart = recieved.split(" ")
-            msgcontent = channelpart.pop(0)
 
 
             if channelpart.__contains__("shit"):
                 channel = bot.get_channel(837553172217593906)
-                await channel.send()
-                return
+                await channel.send(recieved[4:])
             if channelpart.__contains__("shop"):
                 channel = bot.get_channel(1174870748142256188)
-                await channel.send(recieved)
-                return
+                await channel.send(recieved[4:])
             if channelpart.__contains__("plan"):
                 channel = bot.get_channel(1174871457701056593)
-                await channel.send(recieved)
-                return
+                await channel.send(recieved[4:])
             if channelpart.__contains__("resume"):
                 channel = bot.get_channel(1176520850678226964)
-                await channel.send(msgcontent)
-                return
+                await channel.send(recieved[6:])
             if channelpart.__contains__("mom"):
                 channel = bot.get_channel(1105226246633304235)
-                await channel.send(recieved)
-                return
-            else:
-                channel = bot.get_channel(837553172217593906)
-                await channel.send(recieved)
+                await channel.send(recieved[3:])
 
 
     else:
         await send_message("gett outta here")
+        ip = client.getpeername()
+        ipstr = str(ip)
+        temp = DbIpCity.get(ip[0], api_key='free')
+        print("incorrect password attempt from " + ipstr + " " + temp.region + " " + temp.country)
+
+
 
 
     client_socket.close()
@@ -99,12 +104,6 @@ async def start_server():
 
         asyncio.create_task(handle_client(client_socket))
 
-async def sendMessage(client, message):
-    if message.__contains__(bot.user):
-        x = 10
-    else:
-
-        await loop.sock_sendall(client, message.encode())
 
 @bot.event
 async def on_ready():
@@ -115,36 +114,15 @@ async def on_ready():
 
 
 #weawther a nd ti mwer systems
-@aiocron.crontab("20 9 * * *")
+@aiocron.crontab("00 6 * * *")
 async def WeatherTime():
 
     present = datetime.now()
-    future = datetime(2023, 6, 17, 15, 0, 0)
+    future = datetime(2024, 6, 17, 15, 0, 0)
     difference = future - present
     summer = str(difference)
     global totalsummer
     totalsummer = summer[:7]
-
-    present2 = datetime.now()
-    future2 = datetime(2024, 7, 9, 15, 0, 0)
-    difference2 = future2 - present2
-    cbray = str(difference2)
-    global Cbray
-    Cbray = cbray[:7]
-
-    present4 = datetime.now()
-    future4 = datetime(2024, 6, 29, 15, 0, 0)
-    difference4 = future4 - present4
-    gbray = str(difference4)
-    global Gbray
-    Gbray = gbray[:7]
-
-    present3 = datetime.now()
-    future3 = datetime(2024, 6, 17, 15, 0, 0)
-    difference3 = future3 - present3
-    rbray = str(difference3)
-    global Rbray
-    Rbray = rbray[:7]
 
     currentDayIndex = 12
 
@@ -164,24 +142,25 @@ async def WeatherTime():
     monthSlot = todaystr[5] + todaystr[6]
     daySlot = todaystr[8] + todaystr[9]
 
-    variable = "April 1 French Bread Pizza or Queso Pull Apart Sandwiches w/wo Salsa Assorted Cold Sandwiches Grape Tomatoes Fresh Orange Wedges April 4 Chicken Bites or French Toast Sticks w/ Sausage Assorted Cold Sandwiches Fresh Broccoli Craisins April 5 Cheese Steak Sandwich or Chicken and Green Chili Quesadilla Breakfast for Lunch Kits Baby Carrots Fresh Pear April 6 Bosco Sticks w/ Sauce or Ham and Cheese Melt Assorted Cold Sandwiches Celery Sticks Peaches April 7 Cheeseburger or Pepperoni and Cheese Calzone Breakfast for Lunch Kits Baby Carrots Strawberries April 8 Stuffed Crust Pizza or Chicken Quesadilla w/ Salsa Assorted Cold Sandwiches Grape Tomatoes Fresh Orange Wedges April 11 Chicken Tenders- Regular or Spicy Assorted Cold Sandwiches Fresh Broccoli Craisins April 12 EARLY DISMISSAL Grab and Go Lunches offered prior to dismissal April 13-15 April 18 NO SCHOOL April 19 Taco and Cheese Bowls w/ Scoops or Bean and Cheese Burrito Breakfast for Lunch Kits Baby Carrots Fresh Pear April 20 Bosco Sticks w/ Sauce or Egg and Cheese Taco Wrap Assorted Cold Sandwich Celery Sticks Peaches April 21 Cheeseburger or Pepperoni and Cheese Calzone Breakfast for Lunch Kits Baby Carrots Strawberries April 22 French Bread Pizza Or Pork Roll Sandwich w/ Cheese Assorted Cold Sandwich Grape Tomatoes Fresh Orange Wedges April 25 Chicken Tenders- Regular or Spicy Assorted Cold Sandwiches Fresh Broccoli Craisins April 26 Spicy Breaded Chicken Sandwich or Grilled Chicken Sandwich Breakfast for Lunch Kits Baby Carrots Applesauce April 27 Mozzarella Sticks w/wo Sauce or Beef Taco Assorted Cold Sandwiches Celery Sticks Peaches April 28 Breaded Chicken Sandwich or Garlic Pull Apart Sandwiches w/wo Sauce Breakfast for Lunch Kits Baby Carrots Strawberries April 29 French Bread Pizza or Queso Pull Apart Sandwiches w/wo Salsa Assorted Cold Sandwiches Grape Tomatoes Fresh Orange Wedges"
-    words = variable.split("April")
-
     weather = (
-                "Good morning todays forecast is " + e2.text + "\n a tempeture of " + e.text + " and a high off " + e32 + "\n")
+                "today forecast be " + e2.text + "a tempeture of " + e.text)
 
-    timedate = ("rn it is " + current_time + " todays date is " + todaystr)
+    timedate = ("todays date is " + todaystr)
 
     daystr = str(daySlot)
 
-    if words[currentDayIndex].__contains__(daystr):
-        lunch2 = ("todays lunch menu is " + words[currentDayIndex])
-    else:
-        lunch = "no lunch today lol"
     fullthing = weather + timedate
     extra = "thiswork"
     channel = bot.get_channel(1146187982701875291)
-    await channel.send(fullthing)
+    msg = await channel.send(fullthing)
+    await msg.add_reaction("💊")
+
+    UIonwakeup.root.mainloop()
+    try:
+        UIonwakeup.lable.configure(text=fullthing)
+    except e:
+        print("error: " + e)
+
 
 
 
@@ -198,13 +177,11 @@ async def on_guild_join(message, self, guild, member: discord.Member):
 
 @bot.event
 async def on_reaction_add(reaction, user, channel):
-    reactionstr=str(reaction)
-    if reactionstr == "🗑️":
-        def is_me(m):
-            return m.author == "luna"
+    print("reaction added" + reaction + user + channel)
 
-        deleted = await channel.purge(limit=100, check=is_me)
-        await channel.send(f'Deleted {len(deleted)} message(s)')
+async def send_message(ipaddy, message):
+    print(message)
+    await loop.sock_sendall(ipaddy, message.encode())
 
 
 
@@ -223,14 +200,10 @@ async def on_message(message, user: discord.Member = None):
     user = message.author
     user2 = str(user)
 
-    stripmsg = channel + " " + username + " " + user_message
-    # Your existing message processing logic
-    await bot.process_commands(message)
 
-    try:
-        await sendMessage(client, stripmsg)
-    except Exception as e:
-        x = 1
+    stripmsg = channel + " " + username + " " + user_message
+
+    await bot.process_commands(message)
 
     #reminder trxt system
     if user_message.__contains__("morning todays forecast"):
@@ -262,13 +235,15 @@ async def on_message(message, user: discord.Member = None):
 
     if username != bot.user.name:
 
-        if username.__contains__("lunyx"):
-            await message.channel.send(f"das fagot ass bitch")
-            return
-        if user_message.__contains__("stop"):
-            await message.channel.send("no cunt dick dancer bitch")
-            return
 
+
+       ## if user_message.__contains__("purge"):
+        ##    print("ehel")
+        ##    user_message[:6] = num
+        ##    int(num)
+         ##   print("he")
+#
+          ##  return
         if user_message.lower() == "hello":
             await message.channel.send(f"hello {username}")
             return
@@ -291,6 +266,7 @@ async def on_message(message, user: discord.Member = None):
         if user_message.__contains__(f"help"):
             await message.channel.send("skiltles -")
             return
+        await send_message(client, stripmsg)
 
 
 
