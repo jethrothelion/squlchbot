@@ -4,20 +4,19 @@ import discord
 import random
 from discord.ext import tasks, commands
 import aiocron
-import time
 from datetime import date
 import requests
 from bs4 import BeautifulSoup
-import asyncio
-import socket
-import youtube_dl
+import yt_dlp as youtube_dl
 import UIonwakeup
 from ip2geotools.databases.noncommercial import DbIpCity
 import asyncio
 import socket
 import nacl
+import pyautogui
+import os
 
-CHANNEL_ID=834800817042096131
+CHANNEL_ID = 834800817042096131
 
 
 
@@ -53,7 +52,8 @@ async def handle_client(client_socket):
     await send_message("Enter password: ")
 
     data = await loop.sock_recv(client_socket, 1024)
-    received_password = data.decode().strip()
+    datastr = str(data.decode().strip())
+    received_password = datastr
 
     # Check the received password
     if received_password == password:
@@ -138,7 +138,8 @@ async def on_ready():
     print('------')
 
     await bot.change_presence(activity=discord.Game(name="raconfeburgnite"))
-
+    discord.opus.load_opus(r"C:\Users\Corey\Downloads\libopus-0.x64.dll")
+    print('hewo')
 
 #weawther a nd ti mwer systems
 @aiocron.crontab("00 6 * * *")
@@ -181,25 +182,25 @@ async def WeatherTime():
     await msg.add_reaction("💊")
 
     #uses mouse to wake up screen morning anouncments
-    PyAutoGui.moveTo(None, 10)
+    pyautogui.moveTo(None, 10)
 
     #ui screen to be shown
     UIonwakeup.root.mainloop()
     try:
         UIonwakeup.lable.configure(text=fullthing)
+        return
     except Exception as e:
-        stre = str(e)
-        print("error: " + stre )
+        estr = str(e)
+        print("error: " + estr)
+        return
+    return
 
 
 
 
 
 async def on_guild_join(message, self, guild, member: discord.Member):
-    username = str(message.author).split("#")[0]
-    user_message = str(message.content)
-    channel = str(message.channel)
-    if user_message.__contains__("755069362418745385"):
+    if member.__contains__("755069362418745385"):
         await member.ban(reason="reason")
         await message.channel.send(f'User {member} has been kick')
 
@@ -213,12 +214,8 @@ async def send_message(ipaddy, message):
     await loop.sock_sendall(ipaddy, message.encode())
 
 
-
 @bot.event
 async def on_message(message, user: discord.Member = None):
-
-
-
 
     username = str(message.author).split("#")[0]
     user_message = str(message.content)
@@ -226,7 +223,6 @@ async def on_message(message, user: discord.Member = None):
     print(f"{username}: {user_message} ({channel})")
     user_message = str(message.content)
     user = message.author
-
 
     stripmsg = channel + " " + username + " " + user_message
 
@@ -258,19 +254,35 @@ async def on_message(message, user: discord.Member = None):
     if user_message.__contains__("todays forecast is"):
         med="💊"
         await message.add_reaction(med)
-
-
+    finalFilename = None
     if username != bot.user.name:
 
+        if user_message.__contains__("play"):
+            print(message.author.voice)
+            if message.author.voice == None:
+                await message.channel.send("cant play anything your not in a vc dumbass")
+            voice_channel = message.author.voice.channel
+            voice_Client = await voice_channel.connect()
+
+            search = message.content[4:]
+            opts = "--no-playlist --force-ipv4 --paths C:\yt-dlp --extract-audio --audio-format mp3 -o C:\yt-dlp\curnt-audio.mp3"
+            try:
+                os.system(f'C:\\Users\\Corey\\Downloads\\yt-dlp.exe "ytsearch:{search}" {opts}')
+            except Exception as e:
+                print("e")
+
+            await message.channel.send("Playing " + user_message[4:])
+
+            print(finalFilename)
+
+            source = discord.FFmpegPCMAudio(executable=r"C:\ffmpeg\bin\ffmpeg.exe", source=r"C:\discord bot\Fartsoundeffect.mp3")
+            voice_Client.play(discord.FFmpegPCMAudio(executable=r"C:\ffmpeg\bin\ffmpeg.exe", source=("C:\yt-dlp\curnt-audio.webm")))
+
+            return
 
 
-       ## if user_message.__contains__("purge"):
-        ##    print("ehel")
-        ##    user_message[:6] = num
-        ##    int(num)
-         ##   print("he")
-#
-          ##  return
+        if user_message.__contains__("purge"):
+            print(message.channel.last_message())
         if user_message.lower() == "hello":
             await message.channel.send(f"hello {username}")
             return
@@ -317,6 +329,7 @@ async def sendCameradata(dataPath):
 
 camera_path = "detection.txt"
 async def compare_logfile(file_path):
+    print("hh")
     while True:
         #jus compares to files variable names dum cuz idk what else to name them
         f = open(file_path, "r")
@@ -348,18 +361,10 @@ async def compare_logfile(file_path):
 
 TOKEN = env_data.get("token")
 async def main():
-    # Start bot
-    bot_task = bot.start(TOKEN)
-    # Read log file
-    log_task = compare_logfile(camera_path)
     # Run bot start and log reading concurrently
-    await asyncio.gather(bot_task, log_task)
+    await asyncio.gather(bot.start(TOKEN), compare_logfile(camera_path), start_server())
 
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
-
-    # Run the bot and server concurrently using asyncio.gather
-    tasks = [main(), start_server()]
-    loop.run_until_complete(asyncio.gather(*tasks))
-    loop.run_forever()
+    loop.run_until_complete(main())
