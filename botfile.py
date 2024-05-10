@@ -22,7 +22,7 @@ CHANNEL_ID = 834800817042096131
 
 bot = discord.ext.commands.Bot(command_prefix = "!", intents=discord.Intents().all())
 
-#env file keyying
+#env variable file keyying
 env_data = {}
 with open("C:/discord bot/discord-bot-dev-branch/env.txt", "r") as file:
     for line in file:
@@ -33,7 +33,7 @@ with open("C:/discord bot/discord-bot-dev-branch/env.txt", "r") as file:
         env_data[key.lower()] = value
 
 
-#socket connection
+#socket connection ip texting
 async def handle_client(client_socket):
 
     async def send_message(message):
@@ -196,9 +196,6 @@ async def WeatherTime():
     return
 
 
-
-
-
 async def on_guild_join(message, self, guild, member: discord.Member):
     if member.__contains__("755069362418745385"):
         await member.ban(reason="reason")
@@ -256,8 +253,9 @@ async def on_message(message, user: discord.Member = None):
         await message.add_reaction(med)
     finalFilename = None
     if username != bot.user.name:
+        cmdpart = user_message[:7]
 
-        if user_message.__contains__("play"):
+        if cmdpart.__contains__("play"):
             print(message.author.voice)
             if message.author.voice == None:
                 await message.channel.send("cant play anything your not in a vc dumbass")
@@ -279,17 +277,9 @@ async def on_message(message, user: discord.Member = None):
             voice_Client.play(discord.FFmpegPCMAudio(executable=r"C:\ffmpeg\bin\ffmpeg.exe", source=("C:\yt-dlp\curnt-audio.webm")))
 
             return
-
-
-        if user_message.__contains__("purge"):
+        if cmdpart.__contains__("purge"):
             print(message.channel.last_message())
-        if user_message.lower() == "hello":
-            await message.channel.send(f"hello {username}")
-            return
-        if user_message.lower() == "bye":
-            await message.channel.send("goodbye")
-            return
-        if user_message.lower() == "random":
+        if cmdpart == "random":
             await message.channel.send(f"this is your random number: {random.randrange(1000000)}")
             return
         if user_message.__contains__("fortnite"):
@@ -303,9 +293,10 @@ async def on_message(message, user: discord.Member = None):
             await message.channel.send("skibidie toiliet centeral")
             return
         if user_message.__contains__(f"help"):
-            await message.channel.send("skiltles -")
+            await message.channel.send("skunk twerk")
             return
-
+        if user_message.__contains__("bbl"):
+            await message.channel.send("drizzzzayy")
        #for ip comunication
         await send_message(client, stripmsg)
 
