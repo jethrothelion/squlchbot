@@ -353,7 +353,7 @@ async def compare_logfile(file_path):
 TOKEN = env_data.get("token")
 async def main():
     # Run bot start and log reading concurrently
-    await asyncio.gather(bot.start(TOKEN), compare_logfile(camera_path), start_server())
+    await asyncio.gather(bot.start(TOKEN), compare_logfile(camera_path))
 
 
 if __name__ == "__main__":
