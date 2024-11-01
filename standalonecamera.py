@@ -5,6 +5,7 @@ import numpy as np
 # Initialize the camera (default camera is 0)
 camera = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 counter = 0
+latest_frame = None
 
 
 def avrgdif(imageA, imageB):
@@ -13,13 +14,30 @@ def avrgdif(imageA, imageB):
     err /= float(imageA.shape[0] * imageA.shape[1])
     return err
 
+
 # returns image
 def take_picture():
     ret, frame = camera.read()
     return frame
 
-def save_pictures():
-    global counter
+def to_video():
+    cap = cv2.VideoCapture(0)
+
+    # Define the codec and create VideoWriter object
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    out = cv2.VideoWriter('output.avi', fourcc, 20.0, (640, 480))
+
+
+    frame = cv2.flip(latest_frame, 0)
+
+    # write the flipped frame
+    out.write(frame)
+
+    cv2.imshow('frame', frame)
+
+
+def detection():
+    global counter, latest_frame
     previous_frame = take_picture()
     time.sleep(3)
     while True:
@@ -35,23 +53,25 @@ def save_pictures():
                 cv2.imwrite(image_filename, frame)
                 print(f"Image saved as {image_filename}")
 
-                previous_frame = frame
+            previous_frame = frame
 
 
 
 
 
 
-thread = threading.Thread(target=save_pictures, daemon=True)
+def full():
+    detection()
+
+
+
+
+thread = threading.Thread(target=full, daemon=True)
 thread.start()
 
-# Run the main thread for a specified amount of time
-try:
-    while True:
-       time.sleep(4)  # Main thread sleeps; adjust as necessary
-except KeyboardInterrupt:
-    print("Program interrupted. Exiting...")
+while True:
+   time.sleep(4)
 
-# Release the camera and close any OpenCV windows
+
 camera.release()
 cv2.destroyAllWindows()
