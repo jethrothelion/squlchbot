@@ -1,3 +1,5 @@
+import datetime
+
 import cv2
 import threading
 import time
@@ -6,7 +8,7 @@ import numpy as np
 camera = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 counter = 0
 latest_frame = None
-
+video_writer = None
 
 def avrgdif(imageA, imageB):
 
@@ -20,20 +22,31 @@ def take_picture():
     ret, frame = camera.read()
     return frame
 
-def to_video():
-    cap = cv2.VideoCapture(0)
+def save_picture(picture):
+    fileName = f"{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.jpg"
+    print(f"Saving picture as: {fileName}")
+    success = cv2.imwrite(fileName, picture)
+    if success:
+        print("Image saved successfully.")
+    else:
+        print("Failed to save the image.")
 
-    # Define the codec and create VideoWriter object
+
+def initialize_video_writer(frame):
+    global video_writer
+    height, width, _ = frame.shape
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    out = cv2.VideoWriter('output.avi', fourcc, 20.0, (640, 480))
+    file_name = f"{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.avi"
+    video_writer = cv2.VideoWriter(file_name, fourcc, 20.0, (width, height))
+    print(f"Video recording started: {file_name}")
 
 
-    frame = cv2.flip(latest_frame, 0)
-
-    # write the flipped frame
-    out.write(frame)
-
-    cv2.imshow('frame', frame)
+def stop_video_writer():
+    global video_writer
+    if video_writer is not None:
+        video_writer.release()
+        video_writer = None
+        print("Video recording stopped.")
 
 
 def detection():
@@ -45,13 +58,26 @@ def detection():
 
 
         if previous_frame is not None:
+
             sensitvity = 500
-            if avrgdif(frame,previous_frame) > sensitvity:
-                print("this dif")
-                counter += 1
-                image_filename = f"{counter}.jpg"
-                cv2.imwrite(image_filename, frame)
-                print(f"Image saved as {image_filename}")
+            avrgdifresult = avrgdif(frame,previous_frame)
+
+            if avrgdifresult > sensitvity:
+                save_picture(frame)
+                if video_writer is None:
+                    initialize_video_writer(frame)
+
+                video_writer.write(frame)
+
+                same_frame_count = 0
+            else:
+                if video_writer is not None:
+                    same_frame_count += 1
+
+                    video_writer.write(frame)
+
+                    if same_frame_count >= 5:
+                        stop_video_writer()
 
             previous_frame = frame
 
