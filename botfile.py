@@ -215,10 +215,9 @@ async def send_message(ipaddy, message):
 async def on_message(message, user: discord.Member = None):
 
     username = str(message.author).split("#")[0]
-    user_message = str(message.content)
+    user_message = str(message.content).lower()
     channel = str(message.channel)
     print(f"{username}: {user_message} ({channel})")
-    user_message = str(message.content)
     user = message.author
 
     stripmsg = channel + " " + username + " " + user_message
@@ -295,7 +294,7 @@ async def on_message(message, user: discord.Member = None):
         if user_message.__contains__(f"help"):
             await message.channel.send("skunk twerk")
             return
-        if user_message.__contains__("bbl"):
+        if "bbl" in user_message:
             await message.channel.send("drizzzzayy")
        #for ip comunication
         await send_message(client, stripmsg)
