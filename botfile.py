@@ -213,7 +213,7 @@ async def send_message(ipaddy, message):
 
 @bot.event
 async def on_message(message, user: discord.Member = None):
-
+    ytdlpexe = "C:\\Users\\Corey\\Downloads\\yt-dlp.exe"
     username = str(message.author).split("#")[0]
     user_message = str(message.content).lower()
     channel = str(message.channel)
@@ -264,7 +264,7 @@ async def on_message(message, user: discord.Member = None):
             search = message.content[4:]
             opts = "--no-playlist --force-ipv4 --paths C:\yt-dlp --extract-audio --audio-format mp3 -o C:\yt-dlp\curnt-audio.mp3"
             try:
-                os.system(f'C:\\Users\\Corey\\Downloads\\yt-dlp.exe "ytsearch:{search}" {opts}')
+                os.system(f'{ytdlpexe} "ytsearch:{search}" {opts}')
             except Exception as e:
                 print("e")
 
