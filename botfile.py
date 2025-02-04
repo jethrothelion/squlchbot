@@ -33,104 +33,6 @@ with open("C:/discord bot/discord-bot-dev-branch/env.txt", "r") as file:
         env_data[key.lower()] = value
 
 
-#socket connection ip texting
-async def handle_client(client_socket):
-
-    async def send_message(message):
-        await loop.sock_sendall(client_socket, message.encode())
-
-
-    global client
-    client = client_socket
-
-    print(datetime.now())
-
-
-    password = env_data.get("ip password")
-
-    # Send a prompt for password
-    await send_message("Enter password: ")
-
-    data = await loop.sock_recv(client_socket, 1024)
-    datastr = str(data.decode().strip())
-    received_password = datastr
-
-    # Check the received password
-    if received_password == password:
-        await send_message("Access granted. Welcome!\n")
-
-        while True:
-            data = await loop.sock_recv(client_socket, 1024)
-            if not data:
-                break
-
-            print(f"{data.decode('utf-8')}")
-
-
-            recieved = data.decode()
-            channelpart = recieved.split(" ")
-
-
-            if channelpart.__contains__("shit"):
-                channel = bot.get_channel(837553172217593906)
-                await channel.send(recieved[4:])
-            if channelpart.__contains__("shop"):
-                channel = bot.get_channel(1174870748142256188)
-                await channel.send(recieved[4:])
-            if channelpart.__contains__("plan"):
-                channel = bot.get_channel(1174871457701056593)
-                await channel.send(recieved[4:])
-            if channelpart.__contains__("resume"):
-                channel = bot.get_channel(1176520850678226964)
-                await channel.send(recieved[6:])
-            if channelpart.__contains__("fart"):
-                channel = bot.get_channel(1185829928088903710)
-                await channel.send(recieved[4:])
-
-
-    else:
-        await send_message("gett outta here")
-        ip = client.getpeername()
-        ipstr = str(ip)
-        temp = DbIpCity.get(ip[0], api_key='free')
-        print("incorrect password attempt from " + ipstr + " " + temp.region + " " + temp.country + " recieved password: " + received_password)
-
-
-        with open("connections.txt", "a") as connectlog:
-            now = datetime.now()
-            connectlog.write(now.strftime(now.strftime("%Y-%m-%d %H:%M:%S")) + f"\nwrong pass atempt {ipstr}" + " from " + temp.region + " " + temp.country + " " + received_password)
-
-
-
-
-    client_socket.close()
-
-async def start_server():
-
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    host = "192.168.68.65"
-    port = 8383
-
-    server_socket.bind((host, port))
-    server_socket.listen(1)
-
-    print(f"Server listening on {host}:{port}")
-
-    while True:
-        client_socket, client_address = await loop.sock_accept(server_socket)
-
-        ip = client_socket.getpeername()
-        ipstr = str(ip)
-        temp = DbIpCity.get(ip[0], api_key='free')
-
-        print(f"Connection from " + " from " + temp.region + " " + temp.country)
-
-        with open("connections.txt", "a") as connectlog:
-            now = datetime.now()
-            connectlog.write(now.strftime("%Y-%m-%d %H:%M:%S") + f"\nConnection from {client_address}" + " from " + temp.region + " " + temp.country)
-
-        asyncio.create_task(handle_client(client_socket))
-
 
 @bot.event
 async def on_ready():
@@ -141,59 +43,6 @@ async def on_ready():
     discord.opus.load_opus(r"C:\Users\Corey\Downloads\libopus-0.x64.dll")
     print('hewo')
 
-#weawther a nd ti mwer systems
-@aiocron.crontab("00 6 * * *")
-async def WeatherTime():
-
-    present = datetime.now()
-    future = datetime(2024, 6, 17, 15, 0, 0)
-    difference = future - present
-    summer = str(difference)
-    global totalsummer
-    totalsummer = summer[:7]
-
-    currentDayIndex = 12
-
-    URL = "https://forecast.weather.gov/MapClick.php?CityName=Hatboro&state=PA&site=PHI&lat=40.1775&lon=-75.1048#.YnVdK07MK1s"
-    page = requests.get(URL)
-    soup = BeautifulSoup(page.content, "html.parser")
-    e = soup.find("p", class_="myforecast-current-lrg")
-    e2 = soup.find("p", class_="myforecast-current")
-    e3 = soup.find("p", class_="temp temp-high")
-    e32 = e3.text[6:]
-
-    today = date.today()
-
-    todaystr = str(today)
-    monthSlot = todaystr[5] + todaystr[6]
-    daySlot = todaystr[8] + todaystr[9]
-
-    weather = (
-                "today forecast be " + e2.text + "a tempeture of " + e.text)
-
-    timedate = ("todays date is " + todaystr)
-
-    daystr = str(daySlot)
-
-    fullthing = weather + timedate
-    extra = "thiswork"
-    channel = bot.get_channel(1146187982701875291)
-    msg = await channel.send(fullthing)
-    await msg.add_reaction("💊")
-
-    #uses mouse to wake up screen morning anouncments
-    pyautogui.moveTo(None, 10)
-
-    #ui screen to be shown
-    UIonwakeup.root.mainloop()
-    try:
-        UIonwakeup.lable.configure(text=fullthing)
-        return
-    except Exception as e:
-        estr = str(e)
-        print("error: " + estr)
-        return
-    return
 
 
 async def on_guild_join(message, self, guild, member: discord.Member):
@@ -224,32 +73,6 @@ async def on_message(message, user: discord.Member = None):
 
     await bot.process_commands(message)
 
-    #reminder trxt system
-    if user_message.__contains__("morning todays forecast"):
-        Me2ssage = await message.channel.send('Timers?')
-        thumb_up = '👍'
-        thumb_down = '👎'
-
-        await Me2ssage.add_reaction(thumb_up)
-        await Me2ssage.add_reaction(thumb_down)
-
-        global totalsummer
-        global Cbray
-        global Rbray
-        global Gbray
-        y = str(message.author)
-        if y != ("Python Final Progect"):
-            check = lambda reaction, user: bot.user != user
-            await bot.wait_for("reaction_add")
-            x = await message.channel.send(totalsummer + "days till summer" + "\n" "more?")
-            await x.add_reaction(thumb_up)
-            if y != "Python Final Progect":
-                await bot.wait_for("reaction_add")
-                await message.channel.send(Cbray + "till Coreys birthday" + "\n" + Rbray + "till ryleis birthday" + "\n" + Gbray + "till gs brithday" + "\n")
-
-    if user_message.__contains__("todays forecast is"):
-        med="💊"
-        await message.add_reaction(med)
     finalFilename = None
     if username != bot.user.name:
         cmdpart = user_message[:7]
