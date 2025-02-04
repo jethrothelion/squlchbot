@@ -16,6 +16,10 @@ with open("C:/discord bot/discord-bot-dev-branch/env.txt", "r") as file:
         env_data[key.lower()] = value
 
 
+async def send_message(ipaddy, message):
+    await loop.sock_sendall(ipaddy, message.encode())
+
+
 #socket connection ip texting
 async def handle_client(client_socket):
 

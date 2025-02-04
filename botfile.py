@@ -56,10 +56,6 @@ async def on_guild_join(message, self, guild, member: discord.Member):
 async def on_reaction_add(reaction, user, channel):
     print("reaction added" + reaction + user + channel)
 
-async def send_message(ipaddy, message):
-    await loop.sock_sendall(ipaddy, message.encode())
-
-
 @bot.event
 async def on_message(message, user: discord.Member = None):
     ytdlpexe = "C:\\Users\\Corey\\Downloads\\yt-dlp.exe"
