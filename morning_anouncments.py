@@ -1,3 +1,6 @@
+import aiocron
+import datetime
+from UIonwakeup import indoctronated
 
 #weawther a nd ti mwer systems
 @aiocron.crontab("00 6 * * *")
@@ -52,31 +55,3 @@ async def WeatherTime():
         print("error: " + estr)
         return
     return
-
-#reminder trxt system
-if user_message.__contains__("morning todays forecast"):
-    Me2ssage = await message.channel.send('Timers?')
-    thumb_up = '👍'
-    thumb_down = '👎'
-
-    await Me2ssage.add_reaction(thumb_up)
-    await Me2ssage.add_reaction(thumb_down)
-
-    global totalsummer
-    global Cbray
-    global Rbray
-    global Gbray
-    y = str(message.author)
-    if y != ("Python Final Progect"):
-        check = lambda reaction, user: bot.user != user
-        await bot.wait_for("reaction_add")
-        x = await message.channel.send(totalsummer + "days till summer" + "\n" "more?")
-        await x.add_reaction(thumb_up)
-        if y != "Python Final Progect":
-            await bot.wait_for("reaction_add")
-            await message.channel.send(Cbray + "till Coreys birthday" + "\n" + Rbray + "till ryleis birthday" + "\n" + Gbray + "till gs brithday" + "\n")
-
-if user_message.__contains__("todays forecast is"):
-    med="💊"
-    await message.add_reaction(med)
-finalFilename = None

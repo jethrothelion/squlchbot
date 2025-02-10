@@ -1,30 +1,35 @@
-import datetime
-from datetime import datetime
-import discord
-import random
-from discord.ext import tasks, commands
-import aiocron
-from datetime import date
-import requests
-from bs4 import BeautifulSoup
-import yt_dlp as youtube_dl
-import UIonwakeup
-from ip2geotools.databases.noncommercial import DbIpCity
 import asyncio
-import socket
-import nacl
-import pyautogui
+import datetime
 import os
-
-CHANNEL_ID = 834800817042096131
-
-
+import random
+from datetime import datetime
+from pathlib import Path
+import discord
+from discord.ext import tasks, commands
+from ip import start_server
+from morning_anouncments import
 
 bot = discord.ext.commands.Bot(command_prefix = "!", intents=discord.Intents().all())
+global ytdlpexe
+global opusexe
+global ffmpegexe
+global sections_to_run
+ytdlpexe = "C:\\Users\\Corey\\Downloads\\yt-dlp.exe"
+opusexe = r"C:\Users\Corey\Downloads\libopus-0.x64.dll"
+ffmpegexe = r"C:\ffmpeg\bin\ffmpeg.exe"
+sections_to_run = list
+
+CHANNEL_ID = 834800817042096131
+current_path = Path.cwd()
+secCamPath = r'C:\ContaCam\USB HDCam '
+camera_path = "detection.txt"
+
+
 
 #env variable file keyying
 env_data = {}
-with open("C:/discord bot/discord-bot-dev-branch/env.txt", "r") as file:
+env_file = current_path / "env.txt"
+with open(env_file, "r") as file:
     for line in file:
         if not line.strip():
             continue
@@ -32,6 +37,20 @@ with open("C:/discord bot/discord-bot-dev-branch/env.txt", "r") as file:
         key, value = map(str.strip, line.split("="))
         env_data[key.lower()] = value
 
+#startup
+text = """
+What services would you like active?
+1. security camera
+2. ip communication
+3. announcements
+"""
+input = input("enter the sires of numbers you want, regular bot function ran regardless")
+if input.__contains__("1"):
+    global sections_to_run
+    sections_to_run.__add__()
+if input.__contains__("2"):
+
+if input.__contains__("3"):
 
 
 @bot.event
@@ -40,7 +59,8 @@ async def on_ready():
     print('------')
 
     await bot.change_presence(activity=discord.Game(name="raconfeburgnite"))
-    discord.opus.load_opus(r"C:\Users\Corey\Downloads\libopus-0.x64.dll")
+    global opusexe
+    discord.opus.load_opus(opusexe)
     print('hewo')
 
 
@@ -58,7 +78,6 @@ async def on_reaction_add(reaction, user, channel):
 
 @bot.event
 async def on_message(message, user: discord.Member = None):
-    ytdlpexe = "C:\\Users\\Corey\\Downloads\\yt-dlp.exe"
     username = str(message.author).split("#")[0]
     user_message = str(message.content).lower()
     channel = str(message.channel)
@@ -68,6 +87,35 @@ async def on_message(message, user: discord.Member = None):
     stripmsg = channel + " " + username + " " + user_message
 
     await bot.process_commands(message)
+
+    finalFilename = None
+    if user_message.__contains__("todays forecast is"):
+        med = "💊"
+        await message.add_reaction(med)
+
+    # reminder trxt system
+    if user_message.__contains__("morning todays forecast"):
+        Me2ssage = await message.channel.send('Timers?')
+        thumb_up = '👍'
+        thumb_down = '👎'
+
+        await Me2ssage.add_reaction(thumb_up)
+        await Me2ssage.add_reaction(thumb_down)
+
+        global totalsummer
+        global Cbray
+        global Rbray
+        global Gbray
+        y = str(message.author)
+        if y != ("Python Final Progect"):
+            check = lambda reaction, user: bot.user != user
+            await bot.wait_for("reaction_add")
+            x = await message.channel.send(totalsummer + "days till summer" + "\n" "more?")
+            await x.add_reaction(thumb_up)
+            if y != "Python Final Progect":
+                await bot.wait_for("reaction_add")
+                await message.channel.send(
+                    Cbray + "till Coreys birthday" + "\n" + Rbray + "till ryleis birthday" + "\n" + Gbray + "till gs brithday" + "\n")
 
     finalFilename = None
     if username != bot.user.name:
@@ -90,9 +138,10 @@ async def on_message(message, user: discord.Member = None):
             await message.channel.send("Playing " + user_message[4:])
 
             print(finalFilename)
+            global ffmpegexe
 
-            source = discord.FFmpegPCMAudio(executable=r"C:\ffmpeg\bin\ffmpeg.exe", source=r"C:\discord bot\Fartsoundeffect.mp3")
-            voice_Client.play(discord.FFmpegPCMAudio(executable=r"C:\ffmpeg\bin\ffmpeg.exe", source=("C:\yt-dlp\curnt-audio.webm")))
+            source = discord.FFmpegPCMAudio(executable=ffmpegexe, source=r"C:\discord bot\Fartsoundeffect.mp3")
+            voice_Client.play(discord.FFmpegPCMAudio(executable=ffmpegexe, source=("C:\yt-dlp\curnt-audio.webm")))
 
             return
         if cmdpart.__contains__("purge"):
@@ -115,8 +164,7 @@ async def on_message(message, user: discord.Member = None):
             return
         if "bbl" in user_message:
             await message.channel.send("drizzzzayy")
-       #for ip comunication
-        await send_message(client, stripmsg)
+
 
 
 
@@ -128,15 +176,11 @@ async def on_message_edit(before, after):
         f"after: {after.content}"
     )
 
-
-secCamPath = r'C:\ContaCam\USB HDCam '
-
 async def sendCameradata(dataPath):
     camera_chanel = bot.get_channel(1186067959479812126)
 
     await camera_chanel.send(file=discord.File(dataPath))
 
-camera_path = "detection.txt"
 async def compare_logfile(file_path):
     print("hh")
     while True:

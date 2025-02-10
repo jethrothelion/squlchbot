@@ -1,4 +1,4 @@
-
+import pyautogui
 from tkinter import *
 import customtkinter
 

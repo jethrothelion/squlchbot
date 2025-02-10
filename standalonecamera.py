@@ -9,6 +9,7 @@ camera = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 counter = 0
 latest_frame = None
 video_writer = None
+same_frame_count = 0
 
 def avrgdif(imageA, imageB):
 
@@ -76,7 +77,7 @@ def detection():
 
                     video_writer.write(frame)
 
-                    if same_frame_count >= 5:
+                    if same_frame_count >= 30:
                         stop_video_writer()
 
             previous_frame = frame

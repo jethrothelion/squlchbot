@@ -3,11 +3,15 @@ import socket
 from datetime import datetime
 import os
 from ip2geotools.databases.noncommercial import DbIpCity
+import asyncio
+from pathlib import Path
+current_path = Path()
+env_file = current_path / "env.txt"
 
 
 #env variable file keyying
 env_data = {}
-with open("C:/discord bot/discord-bot-dev-branch/env.txt", "r") as file:
+with open(env_file, "r") as file:
     for line in file:
         if not line.strip():
             continue
@@ -96,9 +100,9 @@ async def handle_client(client_socket):
 async def start_server():
 
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    host = "192.168.68.65"
+    hostname = socket.gethostname()
+    host = socket.gethostbyname(hostname)
     port = 8383
-
     server_socket.bind((host, port))
     server_socket.listen(1)
 
@@ -120,3 +124,11 @@ async def start_server():
 
         asyncio.create_task(handle_client(client_socket))
 
+async def main():
+    # Run bot start and log reading concurrently
+    await asyncio.gather(start_server())
+
+
+if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
