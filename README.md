@@ -17,6 +17,7 @@ SqelchBot is a continuation of a 9th grade pyton final project. All features not
 git clone https://github.com/yourusername/SecureBot.git
 cd SecureBot
 pip install -r requirements.txt
+for security camera functions, contacam is needed as of right now
 ```
 
 ## 🛠 Setup
@@ -27,7 +28,7 @@ IP_password=your_password
 ```
 2. Run the bot:
 ```bash
-python bot.py
+botfile.py
 ```
 
 ## 🎮 Commands
