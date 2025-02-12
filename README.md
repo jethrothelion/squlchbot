@@ -26,7 +26,8 @@ for security camera functions, contacam is needed as of right now
 BOT_TOKEN=your_discord_bot_token
 IP_password=your_password
 ```
-2. Run the bot:
+2. put the path of your exes for opus fmmpeg and ytdlp if you want media playing functions
+3. Run the bot:
 ```bash
 botfile.py
 ```
@@ -36,6 +37,7 @@ I will fill out this section later but all commands are avaliable in the on_mess
 
 ## ⚡ Future Features
 - **Intgeration with custom detection software**
+- **rasbary pi support or atleast a diffrent version supporting linux**
 - **Multi-Camera Support**
 - **Encrypted IP Messaging**
 - **Voice Command Integration**
