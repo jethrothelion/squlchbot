@@ -2,7 +2,7 @@
 
 SqelchBot is a continuation of a 9th grade pyton final project. All features not fully implented as of right now because of a major restructuer but all features are there
 
-![SecureBot Banner](https://via.placeholder.com/1200x400?text=SecureBot)
+![SecureBot Banner](http://i.ytimg.com/vi/SQJrYw1QvSQ/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLBY9A7Gomuj6iHkoDkSidTzx0bZAw/1200x400?text=SecureBot)
 
 ## 🚀 Features
 - **🎵 Music Playback** - Play music in voice channels for a better community experience.
