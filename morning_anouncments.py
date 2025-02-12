@@ -1,5 +1,7 @@
 import aiocron
 import datetime
+import requests
+import BeautifulSoup
 from UIonwakeup import indoctronated
 
 #weawther a nd ti mwer systems

@@ -1,13 +1,14 @@
 import asyncio
 import datetime
 import os
+import pathlib
 import random
 from datetime import datetime
 from pathlib import Path
 import discord
 from discord.ext import tasks, commands
 from ip import start_server
-from morning_anouncments import
+
 
 bot = discord.ext.commands.Bot(command_prefix = "!", intents=discord.Intents().all())
 global ytdlpexe
@@ -17,7 +18,7 @@ global sections_to_run
 ytdlpexe = "C:\\Users\\Corey\\Downloads\\yt-dlp.exe"
 opusexe = r"C:\Users\Corey\Downloads\libopus-0.x64.dll"
 ffmpegexe = r"C:\ffmpeg\bin\ffmpeg.exe"
-sections_to_run = list
+sections_to_run = list()
 
 CHANNEL_ID = 834800817042096131
 current_path = Path.cwd()
@@ -45,12 +46,12 @@ What services would you like active?
 3. announcements
 """
 input = input("enter the sires of numbers you want, regular bot function ran regardless")
-if input.__contains__("1"):
-    global sections_to_run
-    sections_to_run.__add__()
-if input.__contains__("2"):
-
-if input.__contains__("3"):
+if "1" in input:
+    sections_to_run.append("1")
+if "2" in input:
+    sections_to_run.append("2")
+if "3" in input:
+    sections_to_run.append("3")
 
 
 @bot.event
@@ -127,9 +128,11 @@ async def on_message(message, user: discord.Member = None):
                 await message.channel.send("cant play anything your not in a vc dumbass")
             voice_channel = message.author.voice.channel
             voice_Client = await voice_channel.connect()
+            curnt_audio = current_path / "yt-dlp" / "curnt-audio.webm"
+            curnt_audio_str = str(curnt_audio)
 
             search = message.content[4:]
-            opts = "--no-playlist --force-ipv4 --paths C:\yt-dlp --extract-audio --audio-format mp3 -o C:\yt-dlp\curnt-audio.mp3"
+            opts = f"--no-playlist --force-ipv4 --paths C:\yt-dlp --extract-audio --audio-format mp3 -o {curnt_audio_str}"
             try:
                 os.system(f'{ytdlpexe} "ytsearch:{search}" {opts}')
             except Exception as e:
@@ -140,8 +143,7 @@ async def on_message(message, user: discord.Member = None):
             print(finalFilename)
             global ffmpegexe
 
-            source = discord.FFmpegPCMAudio(executable=ffmpegexe, source=r"C:\discord bot\Fartsoundeffect.mp3")
-            voice_Client.play(discord.FFmpegPCMAudio(executable=ffmpegexe, source=("C:\yt-dlp\curnt-audio.webm")))
+            voice_Client.play(discord.FFmpegPCMAudio(executable=ffmpegexe, source=(curnt_audio_str)))
 
             return
         if cmdpart.__contains__("purge"):
@@ -215,7 +217,15 @@ async def compare_logfile(file_path):
 TOKEN = env_data.get("token")
 async def main():
     # Run bot start and log reading concurrently
-    await asyncio.gather(bot.start(TOKEN), compare_logfile(camera_path))
+    parts = []
+    if "1" in sections_to_run:
+        parts.append(compare_logfile(camera_path))
+    if "2" in sections_to_run:
+        parts.append(start_server())
+    if "3" in sections_to_run:
+        parts.append()
+
+    await asyncio.gather(bot.start(TOKEN), *parts)
 
 
 if __name__ == "__main__":

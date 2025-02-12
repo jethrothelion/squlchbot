@@ -7,7 +7,10 @@ import asyncio
 from pathlib import Path
 current_path = Path()
 env_file = current_path / "env.txt"
+global loop
 
+if __name__ != "__main__":
+    loop = asyncio.get_event_loop()
 
 #env variable file keyying
 env_data = {}
@@ -108,6 +111,7 @@ async def start_server():
 
     print(f"Server listening on {host}:{port}")
 
+
     while True:
         client_socket, client_address = await loop.sock_accept(server_socket)
 
@@ -130,5 +134,5 @@ async def main():
 
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop()
     loop.run_until_complete(main())

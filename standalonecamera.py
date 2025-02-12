@@ -1,5 +1,4 @@
 import datetime
-
 import cv2
 import threading
 import time
@@ -10,13 +9,18 @@ counter = 0
 latest_frame = None
 video_writer = None
 same_frame_count = 0
-
+global reset
+reset = True
 def avrgdif(imageA, imageB):
 
     err = np.sum((imageA.astype("float") - imageB.astype("float")) ** 2)
     err /= float(imageA.shape[0] * imageA.shape[1])
     return err
 
+def write_to_file(txtfile, datapath):
+    with open(txtfile, "a") as log_file:
+        log_file.write(f"Motion detected at {log_file}\n")
+    print("Motion detection logged.")
 
 # returns image
 def take_picture():
@@ -29,8 +33,10 @@ def save_picture(picture):
     success = cv2.imwrite(fileName, picture)
     if success:
         print("Image saved successfully.")
+        return fileName
     else:
         print("Failed to save the image.")
+        return None
 
 
 def initialize_video_writer(frame):
@@ -51,7 +57,7 @@ def stop_video_writer():
 
 
 def detection():
-    global counter, latest_frame
+    global counter, latest_frame, same_frame_count, reset
     previous_frame = take_picture()
     time.sleep(3)
     while True:
@@ -59,18 +65,22 @@ def detection():
 
 
         if previous_frame is not None:
-
             sensitvity = 500
             avrgdifresult = avrgdif(frame,previous_frame)
 
             if avrgdifresult > sensitvity:
-                save_picture(frame)
+                image_path = save_picture(frame)
                 if video_writer is None:
                     initialize_video_writer(frame)
 
+
                 video_writer.write(frame)
+                if reset and image_path:
+                    write_to_file("motion_log.txt", image_path)  # Log motion only on first detection after reset
 
                 same_frame_count = 0
+                reset = False
+
             else:
                 if video_writer is not None:
                     same_frame_count += 1
@@ -79,6 +89,7 @@ def detection():
 
                     if same_frame_count >= 30:
                         stop_video_writer()
+                        reset = True
 
             previous_frame = frame
 
