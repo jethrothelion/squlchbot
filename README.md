@@ -2,7 +2,7 @@
 
 SqelchBot is a continuation of a 9th grade pyton final project. All features not fully implented as of right now because of a major restructuer but all features are there
 
-![SecureBot Banner](https://via.placeholder.com/1200x400?text=SecureBot)
+![SecureBot Banner](http://i.ytimg.com/vi/SQJrYw1QvSQ/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLBY9A7Gomuj6iHkoDkSidTzx0bZAw/120x300?text=SecureBot)
 
 ## 🚀 Features
 - **🎵 Music Playback** - Play music in voice channels for a better community experience.
@@ -14,7 +14,7 @@ SqelchBot is a continuation of a 9th grade pyton final project. All features not
 
 ## 📦 Installation
 ```bash
-git clone https://github.com/yourusername/SecureBot.git
+git clone https://github.com/jethrothelion/squlchbot.git
 cd SecureBot
 pip install -r requirements.txt
 for security camera functions, contacam is needed as of right now
@@ -26,7 +26,8 @@ for security camera functions, contacam is needed as of right now
 BOT_TOKEN=your_discord_bot_token
 IP_password=your_password
 ```
-2. Run the bot:
+2. put the path of your exes for opus fmmpeg and ytdlp if you want media playing functions
+3. Run the bot:
 ```bash
 botfile.py
 ```
@@ -36,6 +37,7 @@ I will fill out this section later but all commands are avaliable in the on_mess
 
 ## ⚡ Future Features
 - **Intgeration with custom detection software**
+- **rasbary pi support or atleast a diffrent version supporting linux**
 - **Multi-Camera Support**
 - **Encrypted IP Messaging**
 - **Voice Command Integration**
