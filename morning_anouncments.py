@@ -1,10 +1,27 @@
 import aiocron
 import datetime
 import requests
-import BeautifulSoup
-from UIonwakeup import indoctronated
+import pyautogui
+from tkinter import *
+import customtkinter
 
-#weawther a nd ti mwer systems
+
+customtkinter.set_appearance_mode("dark")
+root = customtkinter.CTk()
+root.geometry("1920x960")
+Button = customtkinter.CTkButton (master=root, text="meds?", command = indoctronated())
+Button.place(relx=0.5, rely=0.5, anchor=CENTER)
+lable = customtkinter.CTkLabel(master=root, text_color= "pink", text= "today forecast be Faira tempeture of 30 Ftodays date is 2023-12-14")
+lable.place(relx=0.4, rely=0.1, anchor="ne")
+
+def indoctronated():
+    lable = customtkinter.CTkLabel(master=root, text="taken")
+    lable.place(relx=0.5, rely=0.5, anchor=SW)
+    print("ye")
+    Button.destroy(root)
+
+
+#weawther and ti mwer systems
 @aiocron.crontab("00 6 * * *")
 async def WeatherTime():
 
@@ -15,8 +32,6 @@ async def WeatherTime():
     global totalsummer
     totalsummer = summer[:7]
 
-    currentDayIndex = 12
-
     URL = "https://forecast.weather.gov/MapClick.php?CityName=Hatboro&state=PA&site=PHI&lat=40.1775&lon=-75.1048#.YnVdK07MK1s"
     page = requests.get(URL)
     soup = BeautifulSoup(page.content, "html.parser")
@@ -25,7 +40,7 @@ async def WeatherTime():
     e3 = soup.find("p", class_="temp temp-high")
     e32 = e3.text[6:]
 
-    today = date.today()
+    today = datetime.today()
 
     todaystr = str(today)
     monthSlot = todaystr[5] + todaystr[6]
@@ -39,18 +54,15 @@ async def WeatherTime():
     daystr = str(daySlot)
 
     fullthing = weather + timedate
-    extra = "thiswork"
-    channel = bot.get_channel(1146187982701875291)
-    msg = await channel.send(fullthing)
-    await msg.add_reaction("💊")
+
 
     #uses mouse to wake up screen morning anouncments
     pyautogui.moveTo(None, 10)
 
     #ui screen to be shown
-    UIonwakeup.root.mainloop()
+    indoctronated.root.mainloop()
     try:
-        UIonwakeup.lable.configure(text=fullthing)
+        indoctronated.lable.configure(text=fullthing)
         return
     except Exception as e:
         estr = str(e)

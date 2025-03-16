@@ -151,17 +151,17 @@ async def on_message(message, user: discord.Member = None):
         if cmdpart == "random":
             await message.channel.send(f"this is your random number: {random.randrange(1000000)}")
             return
-        if user_message.__contains__("fortnite"):
+        if "fortnite" in user_message:
             await message.channel.send(f"fortnite balls game 6000 dick dancer dababy")
             return
-        if user_message.__contains__("fog"):
+        if "fog" in user_message:
             await message.channel.send(f"desharen")
             return
         channelstr = str(channel)
-        if channelstr.__contains__("Direct Message"):
+        if "Direct Message" in channelstr:
             await message.channel.send("skibidie toiliet centeral")
             return
-        if user_message.__contains__(f"help"):
+        if f"help" in user_message:
             await message.channel.send("skunk twerk")
             return
         if "bbl" in user_message:
