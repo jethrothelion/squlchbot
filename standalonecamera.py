@@ -3,8 +3,10 @@ import cv2
 import threading
 import time
 import numpy as np
+import asyncio
+
 # Initialize the camera (default camera is 0)
-camera = cv2.VideoCapture(1, cv2.CAP_DSHOW)
+camera = None
 counter = 0
 latest_frame = None
 video_writer = None
@@ -19,13 +21,21 @@ def avrgdif(imageA, imageB):
     return err
 
 def write_to_file(txtfile, message, datapath):
-    with open(txtfile, "a") as log_file:
-        log_file.write(f"{message}\n:\n{datapath}\n")
+    with open(txtfile, "w") as log_file:
+        log_file.write(f"{message}:{datapath}")
     print("Motion detection logged.")
+
+def initialize_camera():
+    global camera
+    if camera is None or not camera.isOpened():
+        print("Initializing camera inside standalonecamera...")
+        camera = cv2.VideoCapture(0)
+    return camera
 
 # returns image
 def take_picture():
-    ret, frame = camera.read()
+    cam = initialize_camera()
+    ret, frame = cam.read()
     return frame
 
 def save_picture(picture):
@@ -44,8 +54,8 @@ def initialize_video_writer(frame):
     global video_writer
     global video_filename
     height, width, _ = frame.shape
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    video_filename = f"{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.avi"
+    fourcc = cv2.VideoWriter_fourcc(*'H264')
+    video_filename = f"{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.mp4"
     video_writer = cv2.VideoWriter(video_filename, fourcc, 20.0, (width, height))
     print(f"Video recording started: {video_filename}")
 
@@ -59,16 +69,17 @@ def stop_video_writer():
 
 
 def detection():
+    print("starting detection")
     global counter, latest_frame, same_frame_count, reset
     previous_frame = take_picture()
     time.sleep(3)
     while True:
         frame = take_picture()
-
-
+        if previous_frame is None:
+            print("camera is not working")
         if previous_frame is not None:
             sensitvity = 500
-            avrgdifresult = avrgdif(frame,previous_frame)
+            avrgdifresult = avrgdif(frame, previous_frame)
 
             if avrgdifresult > sensitvity:
                 image_path = save_picture(frame)
@@ -78,7 +89,8 @@ def detection():
 
                 video_writer.write(frame)
                 if reset and image_path:
-                    write_to_file("motion_log.txt", f"motion detected at {datetime.datetime.now()}",image_path)  # Log motion only on first detection after reset
+                    timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                    write_to_file("motion_log.txt", f"detected: at {timestamp}",image_path)  # Log motion only on first detection after reset
 
                 same_frame_count = 0
                 reset = False
@@ -92,28 +104,27 @@ def detection():
                     if same_frame_count >= 30:
                         global video_filename
                         stop_video_writer()
-                        write_to_file(message="video recording done, no motion detected",txtfile="motion_log.txt", datapath=video_filename)
+                        write_to_file(message="recording: done, no motion detected",txtfile="motion_log.txt", datapath=video_filename)
                         reset = True
 
             previous_frame = frame
 
 
+async def full():
+    loop = asyncio.get_running_loop()
+    await loop.run_in_executor(None, detection)
+
+
+if __name__ == "__main__":
+    import threading
+    thread = threading.Thread(target=detection, daemon=True)
+    thread.start()
+
+    while True:
+        time.sleep(4)
 
 
 
-
-def full():
-    detection()
-
-
-
-
-thread = threading.Thread(target=full, daemon=True)
-thread.start()
-
-while True:
-   time.sleep(4)
-
-
-camera.release()
+cam = initialize_camera()
+cam.release()
 cv2.destroyAllWindows()
