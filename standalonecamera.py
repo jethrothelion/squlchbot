@@ -67,6 +67,11 @@ def stop_video_writer():
         video_writer = None
         print("Video recording stopped.")
 
+def stop_camera():
+    global camera
+    if camera is not None:
+        print("releasing camera")
+        camera.release()
 
 def detection():
     print("starting detection")

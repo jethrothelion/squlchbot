@@ -15,6 +15,7 @@ print("Releasing any previous camera instance...")
 camera = cv2.VideoCapture(0)
 camera.release()
 camera = None
+time.sleep(1)
 print("Camera released successfully!")
 
 # Now import standalonecamera safely
@@ -258,4 +259,11 @@ async def main():
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    try:
+        loop.run_until_complete(main())
+    except KeyboardInterrupt:
+        print("Shutting down")
+        standalonecamera.stop_camera()
+    finally:
+        loop.run_until_complete(bot.close())
+        loop.close()
