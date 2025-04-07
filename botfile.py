@@ -1,4 +1,5 @@
 import asyncio
+import time
 import datetime
 import os
 import pathlib
@@ -10,16 +11,7 @@ from discord.ext import tasks, commands
 import cv2
 from ip import start_server
 
-# Check and reset the camera before importing standalonecamera
-print("Releasing any previous camera instance...")
-camera = cv2.VideoCapture(0)
-camera.release()
-camera = None
-time.sleep(1)
-print("Camera released successfully!")
 
-# Now import standalonecamera safely
-import standalonecamera
 
 
 bot = discord.ext.commands.Bot(command_prefix = "!", intents=discord.Intents().all())
@@ -248,7 +240,18 @@ async def main():
     parts = []
     if "1" in sections_to_run:
         parts.append(compare_logfile(camera_path))
+        # Check and reset the camera before importing standalonecamera
+        print("Releasing any previous camera instance...")
+        camera = cv2.VideoCapture(0)
+        camera.release()
+        camera = None
+        time.sleep(1)
+        print("Camera released successfully!")
+
+        # Now import standalonecamera safely
+        import standalonecamera
         parts.append(standalonecamera.full())
+
     if "2" in sections_to_run:
         parts.append(start_server())
     if "3" in sections_to_run:
