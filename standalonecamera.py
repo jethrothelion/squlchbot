@@ -123,9 +123,13 @@ def detection():
 
 
 async def full():
-    loop = asyncio.get_running_loop()
-    await loop.run_in_executor(None, detection)
+    try:
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(None, detection)
 
+    except asyncio.CancelledError:
+        print("standalonecamera task cancelled, cleaning up...")
+        stop_camera()
 
 if __name__ == "__main__":
     import threading
