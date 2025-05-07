@@ -10,14 +10,14 @@ import discord
 from discord.ext import tasks, commands
 import cv2
 from ip import start_server
-
+import standalonecamera
 
 
 
 bot = discord.ext.commands.Bot(command_prefix = "!", intents=discord.Intents().all())
 
 
-
+cameraid = 1368845660249522196
 ytdlpexe = "C:\\Users\\Corey\\Downloads\\yt-dlp.exe"
 opusexe = r"C:\Users\Corey\Downloads\libopus-0.x64.dll"
 ffmpegexe = r"C:\ffmpeg\bin\ffmpeg.exe"
@@ -189,7 +189,8 @@ async def on_message_edit(before, after):
     )
 
 async def sendCameradata(dataPath):
-    camera_chanel = bot.get_channel(1186067959479812126)
+    global cameraid
+    camera_chanel = bot.get_channel(cameraid)
 
     await camera_chanel.send(file=discord.File(dataPath))
 
@@ -205,8 +206,8 @@ async def compare_logfile(file_path):
                 d = f.read()
 
             if d != c:
-
-                camera_chanel = bot.get_channel(1186067959479812126)
+                global cameraid
+                camera_chanel = bot.get_channel(cameraid)
 
                 logs = [entry.strip() for entry in d.split(":")]
                 print(f"Logs after split: {logs}")

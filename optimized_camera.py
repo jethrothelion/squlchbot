@@ -4,10 +4,49 @@ import asyncio
 from pathlib import Path
 import discord
 from discord.ext import tasks, commands
+from datetime import datetime
+import signal
+import platform
+import os
 
+cameraid = 1368845660249522196
 camera_path = "motion_log.txt"
 current_path = Path.cwd()
 bot = discord.ext.commands.Bot(command_prefix = "!", intents=discord.Intents().all())
+
+# Signal handlers to safely release camera
+def handle_sigtstp(signum, frame):
+    global camera
+    print("Caught SIGTSTP, releasing camera…")
+    if camera is not None:
+        camera.release()
+        camera = None
+        print("Camera released.")
+    signal.signal(signal.SIGTSTP, signal.SIG_DFL)
+    os.kill(os.getpid(), signal.SIGTSTP)
+
+def handle_sigcont(signum, frame):
+    global camera
+    print("Resuming—reopening camera…")
+    camera = cv2.VideoCapture(0)
+
+def clean_up(signum=None, frame=None):
+    global camera
+    print("Cleaning up before exit…")
+    if camera is not None:
+        camera.release()
+        camera = None
+        print("Camera released.")
+    if signum in (signal.SIGINT, signal.SIGTERM):
+        raise SystemExit
+
+# Safe cross-platform signal setup
+signal.signal(signal.SIGINT, clean_up)
+signal.signal(signal.SIGTERM, clean_up)
+
+if platform.system() != "Windows":
+    signal.signal(signal.SIGTSTP, handle_sigtstp)
+    signal.signal(signal.SIGCONT, handle_sigcont)
 
 # Check and reset the camera before importing standalonecamera
 print("Releasing any previous camera instance...")
@@ -36,18 +75,17 @@ async def on_ready():
     print(f'Logged in as {bot.user.name} ({bot.user.id})')
     print('------')
 
-    await bot.change_presence(activity=discord.Game(name="raconfeburgnite"))
-    global opusexe
-    discord.opus.load_opus(opusexe)
+    await bot.change_presence(activity=discord.Game(name="detecting motion"))
     print('hewo')
 
 async def sendCameradata(dataPath):
-    camera_chanel = bot.get_channel(1186067959479812126)
+    global cameraid
+    camera_chanel = bot.get_channel(cameraid)
 
     await camera_chanel.send(file=discord.File(dataPath))
 
 async def compare_logfile(file_path):
-    print("hh")
+    global cameraid
     while True:
         #jus compares to files variable names dum cuz idk what else to name them
         try:
@@ -58,22 +96,17 @@ async def compare_logfile(file_path):
                 d = f.read()
 
             if d != c:
-
-                camera_chanel = bot.get_channel(1186067959479812126)
+                camera_chanel = bot.get_channel(cameraid)
 
                 logs = [entry.strip() for entry in d.split(":")]
-                print(f"Logs after split: {logs}")
                 if logs[0] == "detected":
-                    print("logdetect")
                     clock = str(datetime.now())
                     await camera_chanel.send("camaera detected at " + clock)
-                    print(logs[2])
                     picpath = logs[2]
                     await sendCameradata(picpath)
 
                 if logs[0]== "recording":
                     vidpath = logs[2]
-                    print(vidpath)
                     try: await sendCameradata(vidpath)
                     except Exception as e:
                         errorStr = str(e)
