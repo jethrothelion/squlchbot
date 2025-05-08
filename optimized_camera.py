@@ -17,17 +17,17 @@ bot = discord.ext.commands.Bot(command_prefix = "!", intents=discord.Intents().a
 # Signal handlers to safely release camera
 def handle_sigtstp(signum, frame):
     global camera
-    print("Caught SIGTSTP, releasing camera…")
+    print("\nCaught SIGTSTP, releasing camera…")
     if camera is not None:
         camera.release()
         camera = None
-        print("Camera released.")
+        print("\nCamera released.")
     signal.signal(signal.SIGTSTP, signal.SIG_DFL)
     os.kill(os.getpid(), signal.SIGTSTP)
 
 def handle_sigcont(signum, frame):
     global camera
-    print("Resuming—reopening camera…")
+    print("\nResuming—reopening camera…")
     camera = cv2.VideoCapture(0)
 
 def clean_up(signum=None, frame=None):
@@ -113,7 +113,8 @@ async def compare_logfile(file_path):
                         print(errorStr)
                         await camera_chanel.send("error file proabbly to big"+ errorStr)
         except FileNotFoundError:
-            print("Log file not found, waiting for file to be created...")
+            print("Log file not found, creating")
+            f = open(file_path, "x")
         except Exception as e:
             print(f"Unexpected error in compare_logfile: {e}")
 

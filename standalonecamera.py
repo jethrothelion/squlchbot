@@ -55,9 +55,13 @@ def initialize_video_writer(frame):
     global video_writer
     global video_filename
     height, width, _ = frame.shape
+    if camera is not None:
+        fps = camera.get(cv2.CAP_PROP_FPS)
+        if fps == 0:
+            fps = 20
     fourcc = cv2.VideoWriter_fourcc(*'H264')
     video_filename = f"{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.mp4"
-    video_writer = cv2.VideoWriter(video_filename, fourcc, 20.0, (width, height))
+    video_writer = cv2.VideoWriter(video_filename, fourcc, fps, (width, height))
     print(f"Video recording started: {video_filename}")
 
 
