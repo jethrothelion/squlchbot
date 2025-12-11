@@ -4,6 +4,7 @@ import threading
 import os
 import time
 import numpy as np
+import os
 import asyncio
 
 # Initialize the camera (default camera is 0)
@@ -55,9 +56,13 @@ def initialize_video_writer(frame):
     global video_writer
     global video_filename
     height, width, _ = frame.shape
+    if camera is not None:
+        fps = camera.get(cv2.CAP_PROP_FPS)
+        if fps == 0:
+            fps = 20
     fourcc = cv2.VideoWriter_fourcc(*'H264')
     video_filename = f"{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.mp4"
-    video_writer = cv2.VideoWriter(video_filename, fourcc, 20.0, (width, height))
+    video_writer = cv2.VideoWriter(video_filename, fourcc, fps, (width, height))
     print(f"Video recording started: {video_filename}")
 
 
@@ -123,9 +128,13 @@ def detection():
 
 
 async def full():
-    loop = asyncio.get_running_loop()
-    await loop.run_in_executor(None, detection)
+    try:
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(None, detection)
 
+    except asyncio.CancelledError:
+        print("standalonecamera task cancelled, cleaning up...")
+        stop_camera()
 
 if __name__ == "__main__":
     import threading

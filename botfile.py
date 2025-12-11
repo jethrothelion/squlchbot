@@ -1,4 +1,5 @@
 import asyncio
+import time
 import datetime
 import os
 import pathlib
@@ -9,22 +10,14 @@ import discord
 from discord.ext import tasks, commands
 import cv2
 from ip import start_server
-
-# Check and reset the camera before importing standalonecamera
-print("Releasing any previous camera instance...")
-camera = cv2.VideoCapture(0)
-camera.release()
-camera = None
-print("Camera released successfully!")
-
-# Now import standalonecamera safely
 import standalonecamera
+
 
 
 bot = discord.ext.commands.Bot(command_prefix = "!", intents=discord.Intents().all())
 
 
-
+cameraid = 1368845660249522196
 ytdlpexe = "C:\\Users\\Corey\\Downloads\\yt-dlp.exe"
 opusexe = r"C:\Users\Corey\Downloads\libopus-0.x64.dll"
 ffmpegexe = r"C:\ffmpeg\bin\ffmpeg.exe"
@@ -196,7 +189,8 @@ async def on_message_edit(before, after):
     )
 
 async def sendCameradata(dataPath):
-    camera_chanel = bot.get_channel(1186067959479812126)
+    global cameraid
+    camera_chanel = bot.get_channel(cameraid)
 
     await camera_chanel.send(file=discord.File(dataPath))
 
@@ -212,8 +206,8 @@ async def compare_logfile(file_path):
                 d = f.read()
 
             if d != c:
-
-                camera_chanel = bot.get_channel(1186067959479812126)
+                global cameraid
+                camera_chanel = bot.get_channel(cameraid)
 
                 logs = [entry.strip() for entry in d.split(":")]
                 print(f"Logs after split: {logs}")
@@ -247,7 +241,18 @@ async def main():
     parts = []
     if "1" in sections_to_run:
         parts.append(compare_logfile(camera_path))
+        # Check and reset the camera before importing standalonecamera
+        print("Releasing any previous camera instance...")
+        camera = cv2.VideoCapture(0)
+        camera.release()
+        camera = None
+        time.sleep(1)
+        print("Camera released successfully!")
+
+        # Now import standalonecamera safely
+        import standalonecamera
         parts.append(standalonecamera.full())
+
     if "2" in sections_to_run:
         parts.append(start_server())
     if "3" in sections_to_run:
@@ -258,4 +263,11 @@ async def main():
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    try:
+        loop.run_until_complete(main())
+    except KeyboardInterrupt:
+        print("Shutting down")
+        standalonecamera.stop_camera()
+    finally:
+        loop.run_until_complete(bot.close())
+        loop.close()
