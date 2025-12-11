@@ -1,6 +1,7 @@
 import datetime
 import cv2
 import threading
+import os
 import time
 import numpy as np
 import asyncio
@@ -28,7 +29,7 @@ def write_to_file(txtfile, message, datapath):
 def initialize_camera():
     global camera
     if camera is None or not camera.isOpened():
-        print("Initializing camera inside standalonecamera...")
+        print("Initializing camera")
         camera = cv2.VideoCapture(0)
     return camera
 
@@ -67,7 +68,13 @@ def stop_video_writer():
         video_writer = None
         print("Video recording stopped.")
 
-
+def stop_camera():
+    global camera
+    if camera is not None:
+        print("releasing camera")
+        camera.release()
+    if camera is None:
+        print("camera is none you messed up")
 def detection():
     print("starting detection")
     global counter, latest_frame, same_frame_count, reset
@@ -90,10 +97,15 @@ def detection():
                 video_writer.write(frame)
                 if reset and image_path:
                     timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-                    write_to_file("motion_log.txt", f"detected: at {timestamp}",image_path)  # Log motion only on first detection after reset
+                    log_file_path = "motion_log.txt"
+                    if not os.path.exists(log_file_path):
+                        with open(log_file_path, "w") as f:
+                            f.write("Motion log initialized.\n")
 
-                same_frame_count = 0
-                reset = False
+                    write_to_file(log_file_path, f"detected: at {timestamp}",image_path)  # Log motion only on first detection after reset
+
+                    same_frame_count = 0
+                    reset = False
 
             else:
                 if video_writer is not None:
