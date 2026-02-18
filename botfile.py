@@ -8,9 +8,7 @@ from datetime import datetime
 from pathlib import Path
 import discord
 from discord.ext import tasks, commands
-import cv2
 from ip import start_server
-import standalonecamera
 
 
 
@@ -50,6 +48,8 @@ What services would you like active?
 input = input(text)
 if "1" in input:
     sections_to_run.append("1")
+    import cv2
+    import standalonecamera
 if "2" in input:
     sections_to_run.append("2")
 if "3" in input:
@@ -155,7 +155,6 @@ async def on_message(message, user: discord.Member = None):
             global ffmpegexe
 
             voice_Client.play(discord.FFmpegPCMAudio(executable=ffmpegexe, source=(mp3_file)))
-
         if cmdpart.__contains__("purge"):
             print(message.channel.last_message())
         if cmdpart == "random":
@@ -165,11 +164,24 @@ async def on_message(message, user: discord.Member = None):
             await message.channel.send(f"fortnite balls game 6000 dick dancer dababy")
             return
         if "fog" in user_message:
-            await message.channel.send(f"desharen")
+            await message.channel.send(f"FUCK YOU")
             return
         channelstr = str(channel)
         if "Direct Message" in channelstr:
-            await message.channel.send("skibidie toiliet centeral")
+            usersDMed[] =+ username
+            if count == 1:
+                await message.channel.send("get oout of my dms you pedofilic werido")
+            count += 1
+            if count == 2:
+                await message.channel.send("I SAID GET OUT")
+            if count == 3:
+                await message.channel.send("IM GONNA MUNT YOU")
+                await message.channel.send("IM GONNA MUNT YOU")
+                await message.channel.send("IM GONNA MUNT YOU")
+                await message.channel.send("IM GONNA MUNT YOU")
+                await message.channel.send("IM GONNA MUNT YOU")
+                await message.channel.send("IM GONNA MUNT YOU")
+
             return
         if f"help" in user_message:
             await message.channel.send("skunk twerk")
