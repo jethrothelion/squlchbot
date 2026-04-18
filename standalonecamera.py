@@ -38,6 +38,9 @@ def initialize_camera():
 def take_picture():
     cam = initialize_camera()
     ret, frame = cam.read()
+    if not ret:
+        print("Failed to capture image from camera.")
+        return None
     return frame
 
 def save_picture(picture):
@@ -56,13 +59,15 @@ def initialize_video_writer(frame):
     global video_writer
     global video_filename
     height, width, _ = frame.shape
-    if camera is not None:
-        fps = camera.get(cv2.CAP_PROP_FPS)
-        if fps == 0:
-            fps = 20
     fourcc = cv2.VideoWriter_fourcc(*'H264')
     video_filename = f"{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.mp4"
-    video_writer = cv2.VideoWriter(video_filename, fourcc, fps, (width, height))
+    TARGET_FPS = 30.0
+    video_writer = cv2.VideoWriter(
+        video_filename,
+        fourcc,
+        TARGET_FPS,
+        (width, height)
+    )
     print(f"Video recording started: {video_filename}")
 
 
@@ -83,9 +88,21 @@ def stop_camera():
 def detection():
     print("starting detection")
     global counter, latest_frame, same_frame_count, reset
+    TARGET_FPS = 10.0
+    FRAME_INTERVAL = 1.0 / TARGET_FPS
+    last_time = time.time()
+
     previous_frame = take_picture()
-    time.sleep(3)
+
+
+
     while True:
+        now = time.time()
+        elapsed = now - last_time
+        if elapsed < FRAME_INTERVAL:
+            time.sleep(FRAME_INTERVAL - elapsed)
+        last_time = time.time()
+
         frame = take_picture()
         if previous_frame is None:
             print("camera is not working")

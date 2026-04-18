@@ -1,32 +1,29 @@
 import asyncio
 import time
 import datetime
-import os
-import pathlib
 import random
 from datetime import datetime
 from pathlib import Path
 import discord
 from discord.ext import tasks, commands
-import cv2
-from ip import start_server
-import standalonecamera
 
 
 
-bot = discord.ext.commands.Bot(command_prefix = "!", intents=discord.Intents().all())
+
+bot = commands.Bot(command_prefix = "!", intents=discord.Intents.all())
 
 
 cameraid = 1368845660249522196
 ytdlpexe = "C:\\Users\\Corey\\Downloads\\yt-dlp.exe"
-opusexe = r"C:\Users\Corey\Downloads\libopus-0.x64.dll"
+opusexe = r"D:\opus\libopus-0.x64.dll"
 ffmpegexe = r"C:\ffmpeg\bin\ffmpeg.exe"
 sections_to_run = list()
-CHANNEL_ID = 834800817042096131
 current_path = Path.cwd()
 secCamPath = r'C:\ContaCam\USB HDCam '
 camera_path = "motion_log.txt"
 
+global ListeningFlag
+ListeningFlag = False
 
 
 #env variable file keyying
@@ -40,21 +37,28 @@ with open(env_file, "r") as file:
         key, value = map(str.strip, line.split("="))
         env_data[key.lower()] = value
 
-#startup
+#startup gather done now so dont have to wait to process
 text = """
 What services would you like active?
 1. camera motion detection
 2. ip communication
-3. announcements
+3. local ai bot responses
+4. basic bot functions
 """
 input = input(text)
 if "1" in input:
     sections_to_run.append("1")
+    import cv2
+    import standalonecamera
 if "2" in input:
     sections_to_run.append("2")
+    from ip import start_server
 if "3" in input:
     sections_to_run.append("3")
+    import AIMessenger
 
+if "4" in input:
+    sections_to_run.append("4")
 
 
 @bot.event
@@ -64,24 +68,29 @@ async def on_ready():
 
     await bot.change_presence(activity=discord.Game(name="raconfeburgnite"))
     global opusexe
-    discord.opus.load_opus(opusexe)
-    print('hewo')
+    try:
+        discord.opus.load_opus(opusexe)
+    except Exception as e:
 
-
-
-async def on_guild_join(message, self, guild, member: discord.Member):
-    if member.__contains__("755069362418745385"):
-        await member.ban(reason="reason")
-        await message.channel.send(f'User {member} has been kick')
+        print(f'exception in loading opus: {e}')
 
 
 
 @bot.event
-async def on_reaction_add(reaction, user, channel):
-    print("reaction added" + reaction + user + channel)
+async def on_member_join(member: discord.Member):
+    if "755069362418745385" in str(member.id):
+        await member.ban(reason="reason")
+        if member.guild.system_channel:
+            await member.guild.system_channel.send(f'User {member} has been kick')
+
+
+@bot.event
+async def on_reaction_add(reaction, user):
+    print(f"reaction added {reaction} {user} {reaction.message.channel}")
 
 @bot.event
 async def on_message(message, user: discord.Member = None):
+    global ListeningFlag
     username = str(message.author).split("#")[0]
     user_message = str(message.content).lower()
     channel = str(message.channel)
@@ -93,43 +102,54 @@ async def on_message(message, user: discord.Member = None):
     await bot.process_commands(message)
 
     finalFilename = None
-    if user_message.__contains__("todays forecast is"):
-        med = "💊"
-        await message.add_reaction(med)
-
-    # reminder trxt system
-    if user_message.__contains__("morning todays forecast"):
-        Me2ssage = await message.channel.send('Timers?')
-        thumb_up = '👍'
-        thumb_down = '👎'
-
-        await Me2ssage.add_reaction(thumb_up)
-        await Me2ssage.add_reaction(thumb_down)
-
-        global totalsummer
-        global Cbray
-        global Rbray
-        global Gbray
-        y = str(message.author)
-        if y != ("Python Final Progect"):
-            check = lambda reaction, user: bot.user != user
-            await bot.wait_for("reaction_add")
-            x = await message.channel.send(totalsummer + "days till summer" + "\n" "more?")
-            await x.add_reaction(thumb_up)
-            if y != "Python Final Progect":
-                await bot.wait_for("reaction_add")
-                await message.channel.send(
-                    Cbray + "till Coreys birthday" + "\n" + Rbray + "till ryleis birthday" + "\n" + Gbray + "till gs brithday" + "\n")
-
-    finalFilename = None
     if username != bot.user.name:
-        cmdpart = user_message[:7]
+        cmdpart = user_message[:15]
 
+        if "3" in sections_to_run:
+            actual_message = user_message[4:].strip()  # strip "talk" from front
+            if cmdpart.__contains__("talk"):
+                ListeningFlag = True
+
+
+                AIMessenger.add_message(user,actual_message)
+                reply = await asyncio.get_event_loop().run_in_executor(None, AIMessenger.generate)
+                await message.channel.send(reply)
+
+            elif cmdpart.__contains__("stop talking"):
+                ListeningFlag = False
+                AIMessenger.clear_context()
+                await message.channel.send("Context cleared.")
+            elif ListeningFlag == True:
+                AIMessenger.add_message(user, actual_message)
+                reply = await asyncio.get_event_loop().run_in_executor(None, AIMessenger.generate)
+                await message.channel.send(reply)
         if cmdpart.__contains__("play"):
+            print(stripmsg)
+
+            if message.guild is None:
+                await message.channel.send("You can't use voice commands in DMs.")
+                return
+
             if message.author.voice == None:
                 await message.channel.send("cant play anything your not in a vc dumbass")
+                return
+
             voice_channel = message.author.voice.channel
-            voice_Client = await voice_channel.connect()
+            # REPLACE with:
+            voice_Client = discord.utils.get(bot.voice_clients, guild=message.guild)
+            if voice_Client and voice_Client.is_connected():
+                print("moving to " + str(voice_Client))
+                await voice_Client.move_to(voice_channel)
+            else:
+                print("connecting to " + str(voice_channel))
+                try:
+                    voice_Client = await voice_channel.connect()
+                    print("connected successfully to " + str(voice_channel))
+                except Exception as e:
+                    print(f"connect error: {e}")
+                    await message.channel.send(f"failed to connect: {e}")
+                    return
+
             curnt_audio = current_path / "media"
             curnt_audio_str = str(curnt_audio)
 
@@ -142,7 +162,8 @@ async def on_message(message, user: discord.Member = None):
 
             try:
                 print("Downloading audio...")
-                os.system(f'{ytdlpexe} "ytsearch:{search}" {opts}')
+                process = await asyncio.create_subprocess_shell(f'{ytdlpexe} "ytsearch:{search}" {opts}')
+                await process.communicate()
                 print("Download may be complete")
             except Exception as e:
                 print(f"Download error: {e}")
@@ -168,6 +189,7 @@ async def on_message(message, user: discord.Member = None):
             await message.channel.send(f"desharen")
             return
         channelstr = str(channel)
+
         if "Direct Message" in channelstr:
             await message.channel.send("skibidie toiliet centeral")
             return
@@ -256,8 +278,9 @@ async def main():
     if "2" in sections_to_run:
         parts.append(start_server())
     if "3" in sections_to_run:
-        parts.append()
-
+        pass
+    if "4" in sections_to_run:
+        pass
     await asyncio.gather(bot.start(TOKEN), *parts)
 
 
