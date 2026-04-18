@@ -1,0 +1,6 @@
+asyncio
+discord.py
+opencv_python
+numpy
+ip2geotools.databases.noncommercial
+socket
