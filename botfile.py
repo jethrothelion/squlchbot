@@ -109,7 +109,7 @@ async def on_message(message, user: discord.Member = None):
             actual_message = user_message[4:].strip()  # strip "talk" from front
             if cmdpart.__contains__("talk"):
                 ListeningFlag = True
-
+                print("starting talking")
 
                 AIMessenger.add_message(user,actual_message)
                 reply = await asyncio.get_event_loop().run_in_executor(None, AIMessenger.generate)
