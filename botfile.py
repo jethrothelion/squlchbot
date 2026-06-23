@@ -106,23 +106,19 @@ async def on_message(message, user: discord.Member = None):
         cmdpart = user_message[:15]
 
         if "3" in sections_to_run:
-            actual_message = user_message[4:].strip()  # strip "talk" from front
-            if cmdpart.__contains__("talk"):
+            if ListeningFlag == True:
+                print("talking")
+                AIMessenger.add_message(user_message, username)
+                output = AIMessenger.run_model()
+                await message.channel.send(output)
+                print("past talk")
+            if cmdpart.__contains__("start talk"):
                 ListeningFlag = True
                 print("starting talking")
-
-                AIMessenger.add_message(user,actual_message)
-                reply = await asyncio.get_event_loop().run_in_executor(None, AIMessenger.generate)
-                await message.channel.send(reply)
-
-            elif cmdpart.__contains__("stop talking"):
+            if cmdpart.__contains__("stop talk"):
                 ListeningFlag = False
-                AIMessenger.clear_context()
-                await message.channel.send("Context cleared.")
-            elif ListeningFlag == True:
-                AIMessenger.add_message(user, actual_message)
-                reply = await asyncio.get_event_loop().run_in_executor(None, AIMessenger.generate)
-                await message.channel.send(reply)
+                print("stopping talking")
+
         if cmdpart.__contains__("play"):
             print(stripmsg)
 
