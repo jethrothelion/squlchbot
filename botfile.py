@@ -9,14 +9,23 @@ from discord.ext import tasks, commands
 
 
 
-
 bot = commands.Bot(command_prefix = "!", intents=discord.Intents.all())
+tree = bot.tree
+
+ytdlpexe = "C:\\Users\\Corey\\Downloads\\yt-dlp.exe"
+if not Path(ytdlpexe).exists():
+    ytdlpexe = "yt-dlp"
+
+opusexe = r"D:\opus\libopus-0.x64.dll"
+if not Path(opusexe).exists():
+    opusexe = "libopus"
+
+ffmpegexe = r"C:\ffmpeg\bin\ffmpeg.exe"
+if not Path(ffmpegexe).exists():
+    ffmpegexe = "ffmpeg"
 
 
 cameraid = 1368845660249522196
-ytdlpexe = "C:\\Users\\Corey\\Downloads\\yt-dlp.exe"
-opusexe = r"D:\opus\libopus-0.x64.dll"
-ffmpegexe = r"C:\ffmpeg\bin\ffmpeg.exe"
 sections_to_run = list()
 current_path = Path.cwd()
 secCamPath = r'C:\ContaCam\USB HDCam '
@@ -65,15 +74,17 @@ if "4" in input:
 async def on_ready():
     print(f'Logged in as {bot.user.name} ({bot.user.id})')
     print('------')
-
     await bot.change_presence(activity=discord.Game(name="raconfeburgnite"))
+
+    synced = await bot.tree.sync()
+    print(f"synced {len(synced)} slash commands")
+
     global opusexe
     try:
         discord.opus.load_opus(opusexe)
     except Exception as e:
 
         print(f'exception in loading opus: {e}')
-
 
 
 @bot.event
@@ -87,6 +98,7 @@ async def on_member_join(member: discord.Member):
 @bot.event
 async def on_reaction_add(reaction, user):
     print(f"reaction added {reaction} {user} {reaction.message.channel}")
+
 
 @bot.event
 async def on_message(message, user: discord.Member = None):
@@ -119,60 +131,6 @@ async def on_message(message, user: discord.Member = None):
                 ListeningFlag = False
                 print("stopping talking")
 
-        if cmdpart.__contains__("play"):
-            print(stripmsg)
-
-            if message.guild is None:
-                await message.channel.send("You can't use voice commands in DMs.")
-                return
-
-            if message.author.voice == None:
-                await message.channel.send("cant play anything your not in a vc dumbass")
-                return
-
-            voice_channel = message.author.voice.channel
-            # REPLACE with:
-            voice_Client = discord.utils.get(bot.voice_clients, guild=message.guild)
-            if voice_Client and voice_Client.is_connected():
-                print("moving to " + str(voice_Client))
-                await voice_Client.move_to(voice_channel)
-            else:
-                print("connecting to " + str(voice_channel))
-                try:
-                    voice_Client = await voice_channel.connect()
-                    print("connected successfully to " + str(voice_channel))
-                except Exception as e:
-                    print(f"connect error: {e}")
-                    await message.channel.send(f"failed to connect: {e}")
-                    return
-
-            curnt_audio = current_path / "media"
-            curnt_audio_str = str(curnt_audio)
-
-            search = message.content[4:]
-            opts = (
-                f"--no-playlist --force-ipv4 --default-search ytsearch "
-                f"--extract-audio --audio-format mp3 "
-                f"-x -o \"{curnt_audio_str}\output.%(ext)s\""
-            )
-
-            try:
-                print("Downloading audio...")
-                process = await asyncio.create_subprocess_shell(f'{ytdlpexe} "ytsearch:{search}" {opts}')
-                await process.communicate()
-                print("Download may be complete")
-            except Exception as e:
-                print(f"Download error: {e}")
-
-            mp3_file = f"{curnt_audio_str}\output.mp3"
-
-            await message.channel.send("Playing " + user_message[4:])
-
-            print(finalFilename)
-            global ffmpegexe
-
-            voice_Client.play(discord.FFmpegPCMAudio(executable=ffmpegexe, source=(mp3_file)))
-
         if cmdpart.__contains__("purge"):
             print(message.channel.last_message())
         if cmdpart == "random":
@@ -196,8 +154,6 @@ async def on_message(message, user: discord.Member = None):
             await message.channel.send("drizzzzayy")
 
 
-
-
 @bot.event
 async def on_message_edit(before, after):
     print(
@@ -205,6 +161,86 @@ async def on_message_edit(before, after):
         f"before: {before.content}\n"
         f"after: {after.content}"
     )
+
+
+@bot.tree.command(name="play", description="Plays youtube video")
+async def play(interaction: discord.Interaction, *, search: str):
+    await interaction.response.defer()
+
+    if interaction.guild is None:
+        await interaction.followup.send("You can't use voice commands in DMs.")
+        return
+    if interaction.user.voice is None:
+        await interaction.followup.send("cant play anything your not in a vc dumbass")
+        return
+
+    voice_channel = interaction.user.voice.channel
+    voice_Client = discord.utils.get(bot.voice_clients, guild=interaction.guild)
+
+
+    #VOICE CONNECTION LOGIC
+    if voice_Client and voice_Client.is_connected():
+        print("moving to " + str(voice_Client))
+        await voice_Client.move_to(voice_channel)
+    else:
+        print("connecting to " + str(voice_channel))
+        try:
+            voice_Client = await voice_channel.connect()
+            print("connected successfully to " + str(voice_channel))
+        except Exception as e:
+            print(f"connect error: {e}")
+            await interaction.followup.send(f"failed to connect: {e}")
+            return
+
+    if voice_Client.is_playing():
+        voice_Client.stop()
+
+    FFMPEG_OPTIONS = {
+        'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
+        'options': '-vn'
+    }
+
+    #GET VIDEO URL
+    if search.startswith("https"):
+        page_url = search
+        proc = await asyncio.create_subprocess_shell(
+            f'{ytdlpexe} -f bestaudio --print "%(title)s" --print "%(url)s" "ytsearch:{page_url}"',
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        stdout_bytes, stderr_bytes = await proc.communicate()
+        if not stdout_bytes:
+            await interaction.followup.send("couldnt get audio from that url")
+            return
+        lines = stdout_bytes.decode().strip().split('\n')
+        title = lines[0]
+        url = lines[1]
+
+        source = discord.FFmpegPCMAudio(executable=ffmpegexe, source=url, **FFMPEG_OPTIONS)
+        voice_Client.play(source)
+
+    else:
+        print(f"searching for video {search}")
+        proc = await asyncio.create_subprocess_shell(
+            f'{ytdlpexe} -f bestaudio --print "%(title)s" --print "%(webpage_url)s" --print "%(url)s" "ytsearch:{search}"',
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        stdout_bytes, stderr_bytes = await proc.communicate()
+        if not stdout_bytes:
+            await interaction.followup.send("couldnt find anything for: " + search)
+            return
+        lines = stdout_bytes.decode().strip().split('\n')
+        title = lines[0]
+        page_url = lines[1]
+        url = lines[2]
+        print(f"found url for {search}")
+
+        source = discord.FFmpegPCMAudio(source=url)
+        voice_Client.play(source)
+
+    await interaction.followup.send(f"Now playing **{title}**\n{page_url}")
+
 
 async def sendCameradata(dataPath):
     global cameraid
@@ -254,7 +290,6 @@ async def compare_logfile(file_path):
 
 TOKEN = env_data.get("token")
 async def main():
-    print("3")
     # Run bot start and log reading concurrently
     parts = []
     if "1" in sections_to_run:
